@@ -1,34 +1,70 @@
-# Mysthaven — The Things We Carry
+# Mysthaven Version 2
+## The House With One Locked Door
 
-A browser-playable vertical-slice prototype exploring two forms of Mysthaven magic:
+A longer browser-playable vertical slice exploring object magic, dream magic, learned attention, gated access, consent, and consequence.
 
-- **Object magic:** physical observation becomes partial trace; the player creates an interpretation and must answer for it.
-- **Dream magic:** feeling, symbol and focus create pressure rather than factual messages; the receiver supplies meaning.
+The prototype is a static site made with HTML, CSS, and vanilla JavaScript. It requires no build process, package manager, API key, database, or paid hosting.
 
-The game is built with plain HTML, CSS and JavaScript. It has no build step, framework, database or paid dependency.
+## What Version 2 adds
 
-## What is included
+### Longer progression
 
-- Five Art Nouveau object illustrations
-- Object inspection with material-evidence hotspots
-- A hold-to-attend trace mechanic
-- A journal of claims, learned distinctions and dream residue
-- An irreversible **Repair Joins** perception skill
-- A received dream sequence with waking anchors and a boundary choice
-- A dream-composition system using feeling, symbol, focus and an optional exit anchor
-- Consequences and several design-facing endings
-- Local browser autosave
-- Optional procedural rain ambience and interaction tones using the Web Audio API
-- Responsive desktop/mobile layout
+The game now moves through a complete sequence:
 
-## File structure
+1. Investigate five ordinary objects.
+2. Reach partial object traces.
+3. Record both a claim and the trace's limitation.
+4. Earn **Witnessing** through three accountable investigations.
+5. Earn **Repair Joins** by comparing two kinds of repair.
+6. Earn **Pattern Reading** through object comparison.
+7. Earn **Stillness** through a timing-based attention exercise.
+8. Earn **Sequence Tracing** by reconstructing habit, rupture, and aftermath.
+9. Apply all five disciplines to Serena's locked door.
+10. Investigate Elwin's ashwood box using several attention methods.
+11. Earn waking anchors before deliberately entering a dream.
+12. Navigate dream routes whose states are locked behind prior disciplines.
+13. Compose or refuse a dream-pressure response.
+14. Reach one of several consequence-based endings.
+
+### Gated access
+
+The player cannot simply click through to every state.
+
+Locked states name what is missing. Examples:
+
+- Object trace is locked until all material details are observed.
+- **Witnessing** is locked until the player records three accountable claim/limit pairs.
+- Repair states are locked until **Repair Joins** is demonstrated.
+- The quiet-object state is locked until comparative attention is completed.
+- The locked room requires five distinct ways of attending.
+- The ashwood box requires four applied methods and Witnessing.
+- The dream requires three waking anchors.
+- Tracing a dream route without entering it requires all four anchors plus Sequence Tracing.
+- Several dream-composer options remain unavailable unless their source discipline was earned.
+
+### Attention mechanics
+
+- visual hotspot observation;
+- held attention to cross from evidence into trace;
+- explicit selection of what a trace cannot establish;
+- comparative object pairing;
+- repair-method interpretation;
+- a timed stillness exercise;
+- causal sequence ordering;
+- multi-method inspection gates;
+- waking-anchor identification;
+- gated dream navigation;
+- dream composition with feeling, symbol, focus, and an optional interruptible exit.
+
+## Files
 
 ```text
-mysthaven-prototype/
+mysthaven-v2-prototype/
 ├── index.html
 ├── styles.css
 ├── script.js
 ├── README.md
+├── PLAYTEST_GUIDE.md
 └── assets/
     ├── wooden-bird.png
     ├── thimble.png
@@ -39,9 +75,9 @@ mysthaven-prototype/
 
 ## Run locally
 
-The simplest option is to open `index.html` in a modern browser.
+Opening `index.html` directly in a modern browser should work.
 
-A local web server is more reliable:
+A small local server is recommended during development:
 
 ```bash
 python3 -m http.server 8000
@@ -55,49 +91,38 @@ http://localhost:8000
 
 ## Publish with GitHub Pages
 
-### Browser-only method
+1. Create a public GitHub repository, such as `mysthaven-v2`.
+2. Open the extracted `mysthaven-v2-prototype` folder.
+3. Upload the **contents** of the folder to the repository root.
+4. Confirm that `index.html`, `styles.css`, and `script.js` are visible at the repository root.
+5. Commit the files.
+6. Open the repository's **Settings**.
+7. Select **Pages**.
+8. Under **Build and deployment**, choose **Deploy from a branch**.
+9. Choose the `main` branch and `/ (root)` folder.
+10. Save and wait for GitHub to provide the public Pages address.
 
-1. Sign into GitHub.
-2. Create a new public repository, such as `mysthaven-game`.
-3. Do **not** initialize it with starter files if you plan to upload the provided folder contents immediately.
-4. Open the new repository and choose **Add file → Upload files**.
-5. Drag the contents of the `mysthaven-prototype` folder into the upload area. Upload the files themselves, not an extra enclosing folder.
-6. Confirm that `index.html` is visible at the repository root and the five images are inside an `assets` folder.
-7. Enter a commit message such as `Add Mysthaven game prototype`, then choose **Commit changes**.
-8. Open **Settings → Pages**.
-9. Under **Build and deployment** choose:
-   - **Source:** Deploy from a branch
-   - **Branch:** `main`
-   - **Folder:** `/ (root)`
-10. Save. GitHub will display the published site URL after deployment.
-
-The URL will usually look like:
+The final address will generally resemble:
 
 ```text
-https://YOUR-USERNAME.github.io/mysthaven-game/
+https://YOUR-USERNAME.github.io/mysthaven-v2/
 ```
 
-### Git command-line method
+## Saves
 
-```bash
-git init
-git add .
-git commit -m "Add Mysthaven game prototype"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/mysthaven-game.git
-git push -u origin main
-```
+The game uses browser `localStorage` to autosave progress. Saves are specific to the browser and device being used. The **Reset** button clears the local playthrough.
 
-Then enable GitHub Pages from the repository settings as described above.
+## Test status
 
-## Updating the game
+- JavaScript syntax check passed.
+- Static asset references checked.
+- A complete automated browser playthrough passed from the title screen through the highest-access dream path and the **Accountable Attention** ending.
+- No JavaScript runtime errors were reported during that playthrough.
 
-Edit `index.html`, `styles.css` or `script.js`, then commit the changed files to the same repository. GitHub Pages republishes after each push or browser-based commit.
+## Design principle
 
-## Save behavior
+> Magic is an intensification of something people already do.
 
-The prototype saves to `localStorage` in the player’s browser. Saves are specific to the browser and GitHub Pages URL. Clearing browser site data or using the in-game Reset control removes the save.
+Version 2 adds a companion principle:
 
-## Design note
-
-The ending scores are not intended as a moral grading system. They expose the design pressures expressed during play: care, craft, courage, trespass and certainty.
+> Access is earned through attention. Ownership is not.

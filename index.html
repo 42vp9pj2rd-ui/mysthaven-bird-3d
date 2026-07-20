@@ -4,32 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#172018">
-  <meta name="description" content="A playable Mysthaven prototype exploring object magic, dream magic, attention, consent, and consequence.">
-  <title>Mysthaven — The Things We Carry</title>
+  <meta name="description" content="Mysthaven Version 2: a longer playable prototype about object magic, dream magic, earned attention, consent, and consequence.">
+  <title>Mysthaven V2 — The House With One Locked Door</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <noscript>
-    <div class="noscript">This prototype requires JavaScript.</div>
-  </noscript>
+  <noscript><div class="noscript">This prototype requires JavaScript.</div></noscript>
 
   <div id="app" class="app-shell">
     <header id="gameHeader" class="game-header hidden" aria-label="Game status">
       <div class="brand-block">
-        <p class="eyebrow">Mysthaven</p>
-        <h1>The Things We Carry</h1>
+        <p class="eyebrow">Mysthaven · Version 2</p>
+        <h1>The House With One Locked Door</h1>
       </div>
       <div class="header-status">
         <div class="progress-copy">
           <span id="chapterLabel">Chapter I</span>
           <strong id="sceneLabel">After the Rain</strong>
         </div>
-        <div class="progress-track" aria-hidden="true">
-          <div id="progressFill" class="progress-fill"></div>
-        </div>
+        <div class="progress-track" aria-hidden="true"><div id="progressFill" class="progress-fill"></div></div>
       </div>
       <div class="header-actions">
-        <button id="soundBtn" class="icon-btn" type="button" aria-pressed="false" title="Toggle ambient sound">Sound off</button>
+        <button id="soundBtn" class="icon-btn" type="button" aria-pressed="false">Sound off</button>
         <button id="journalBtn" class="icon-btn" type="button">Journal</button>
         <button id="resetBtn" class="icon-btn danger" type="button">Reset</button>
       </div>
@@ -63,17 +59,9 @@
             <div id="observationList" class="observation-list"></div>
           </section>
 
-          <section id="advancedObservationBlock" class="inspector-block hidden">
-            <div class="block-heading-row">
-              <h3 id="advancedHeading">A learned distinction</h3>
-              <span class="counter-pill distinction-pill">New sight</span>
-            </div>
-            <div id="advancedObservationList" class="observation-list"></div>
-          </section>
-
           <section class="inspector-block">
             <h3>Stay with it</h3>
-            <p class="small muted">Hold long enough for familiarity to loosen. Observation must come first.</p>
+            <p class="small muted">Hold long enough for familiarity to loosen. Material observation must come first.</p>
             <button id="attendBtn" class="action-btn secondary" type="button" disabled>Hold to attend</button>
             <div class="hold-track" aria-hidden="true"><div id="holdFill" class="hold-fill"></div></div>
           </section>
@@ -87,7 +75,17 @@
             <h3>What will Lyria carry out?</h3>
             <p class="small muted">The object offers trace. The claim belongs to you.</p>
             <form id="claimForm" class="choice-stack"></form>
-            <button id="saveClaimBtn" class="action-btn primary" type="button" disabled>Write claim in journal</button>
+          </section>
+
+          <section id="limitBlock" class="inspector-block hidden">
+            <h3>What can this trace not establish?</h3>
+            <p class="small muted">Accountable attention includes knowing the characteristic way an answer can be wrong.</p>
+            <form id="limitForm" class="choice-stack"></form>
+          </section>
+
+          <section id="saveObjectBlock" class="inspector-block hidden">
+            <div id="objectFeedback" class="feedback-box muted"></div>
+            <button id="saveClaimBtn" class="action-btn primary" type="button" disabled>Write claim and limit in journal</button>
           </section>
         </div>
       </div>
@@ -99,20 +97,12 @@
     <section class="journal-card parchment-frame" role="dialog" aria-modal="true" aria-labelledby="journalTitle">
       <button id="journalCloseBtn" class="close-btn" type="button" aria-label="Close journal">×</button>
       <p class="eyebrow">Lyria's journal</p>
-      <h2 id="journalTitle">Distinctions, Claims, Residue</h2>
-      <div class="journal-grid">
-        <section>
-          <h3>Claims carried from objects</h3>
-          <div id="journalClaims" class="journal-list"></div>
-        </section>
-        <section>
-          <h3>Ways of attending</h3>
-          <div id="journalSkills" class="journal-list"></div>
-        </section>
-        <section>
-          <h3>Dream residue</h3>
-          <div id="journalDream" class="journal-list"></div>
-        </section>
+      <h2 id="journalTitle">Claims, Distinctions, Gates, Residue</h2>
+      <div class="journal-grid journal-grid-wide">
+        <section><h3>Claims carried from objects</h3><div id="journalClaims" class="journal-list"></div></section>
+        <section><h3>Ways of attending</h3><div id="journalSkills" class="journal-list"></div></section>
+        <section><h3>Access gates</h3><div id="journalGates" class="journal-list"></div></section>
+        <section><h3>Dream residue</h3><div id="journalDream" class="journal-list"></div></section>
       </div>
     </section>
   </div>
