@@ -1,83 +1,44 @@
-# Mysthaven Version 2
-## The House With One Locked Door
+# Mysthaven — The First Lesson
 
-A longer browser-playable vertical slice exploring object magic, dream magic, learned attention, gated access, consent, and consequence.
+A guided tutorial build for the Mysthaven HTML game prototype.
 
-The prototype is a static site made with HTML, CSS, and vanilla JavaScript. It requires no build process, package manager, API key, database, or paid hosting.
+This version redesigns the opening so the player learns object-magic attention from the bottom up through Serena's instruction. It then returns to the longer Version 2 progression after the player has demonstrated the foundation independently.
 
-## What Version 2 adds
+## The tutorial sequence
 
-### Longer progression
+The player is taught through action rather than being given a glossary:
 
-The game now moves through a complete sequence:
+1. **Notice** — identify physical wear without interpreting it.
+2. **Ask** — form a narrow question the object may actually be able to answer.
+3. **Stay** — hold attention through the uneventful threshold into trace.
+4. **Separate** — distinguish material observation, received trace and personal claim.
+5. **Limit** — name what the evidence cannot establish.
+6. **Practice** — repeat the complete process on the brass thimble with optional guidance.
+7. **Independent test** — return to the five-object table and witness one more object without step-by-step prompting.
 
-1. Investigate five ordinary objects.
-2. Reach partial object traces.
-3. Record both a claim and the trace's limitation.
-4. Earn **Witnessing** through three accountable investigations.
-5. Earn **Repair Joins** by comparing two kinds of repair.
-6. Earn **Pattern Reading** through object comparison.
-7. Earn **Stillness** through a timing-based attention exercise.
-8. Earn **Sequence Tracing** by reconstructing habit, rupture, and aftermath.
-9. Apply all five disciplines to Serena's locked door.
-10. Investigate Elwin's ashwood box using several attention methods.
-11. Earn waking anchors before deliberately entering a dream.
-12. Navigate dream routes whose states are locked behind prior disciplines.
-13. Compose or refuse a dream-pressure response.
-14. Reach one of several consequence-based endings.
+Every deeper interface state remains locked until the player has practised the discipline it represents.
 
-### Gated access
+## Player-experience principles
 
-The player cannot simply click through to every state.
-
-Locked states name what is missing. Examples:
-
-- Object trace is locked until all material details are observed.
-- **Witnessing** is locked until the player records three accountable claim/limit pairs.
-- Repair states are locked until **Repair Joins** is demonstrated.
-- The quiet-object state is locked until comparative attention is completed.
-- The locked room requires five distinct ways of attending.
-- The ashwood box requires four applied methods and Witnessing.
-- The dream requires three waking anchors.
-- Tracing a dream route without entering it requires all four anchors plus Sequence Tracing.
-- Several dream-composer options remain unavailable unless their source discipline was earned.
-
-### Attention mechanics
-
-- visual hotspot observation;
-- held attention to cross from evidence into trace;
-- explicit selection of what a trace cannot establish;
-- comparative object pairing;
-- repair-method interpretation;
-- a timed stillness exercise;
-- causal sequence ordering;
-- multi-method inspection gates;
-- waking-anchor identification;
-- gated dream navigation;
-- dream composition with feeling, symbol, focus, and an optional interruptible exit.
+- Serena teaches for a practical reason: returning a child's lost object without treating the child's private fear as a collectible clue.
+- Vocabulary follows experience. The game names a discipline after the player has performed it.
+- Wrong choices receive specific in-world teaching rather than a generic failure message.
+- The player may ask Serena for guidance during practice without being penalized.
+- Gates explain what is missing and why it matters.
+- The tutorial completes with competence, not mastery. Serena consistently distinguishes witnessing from knowing everything.
 
 ## Files
 
-```text
-mysthaven-v2-prototype/
-├── index.html
-├── styles.css
-├── script.js
-├── README.md
-├── PLAYTEST_GUIDE.md
-└── assets/
-    ├── wooden-bird.png
-    ├── thimble.png
-    ├── buckle.png
-    ├── button.png
-    └── spoon.png
-```
+- `index.html` — page structure
+- `styles.css` — responsive Art Nouveau interface and tutorial styling
+- `script.js` — tutorial, object system and the longer game progression
+- `assets/` — five generated object illustrations
+- `PLAYTEST_GUIDE.md` — tutorial test checklist
+- `PATCH_NOTES.md` — major changes from Version 2
 
 ## Run locally
 
-Opening `index.html` directly in a modern browser should work.
-
-A small local server is recommended during development:
+Open `index.html` directly, or run a local server from this folder:
 
 ```bash
 python3 -m http.server 8000
@@ -91,42 +52,14 @@ http://localhost:8000
 
 ## Publish with GitHub Pages
 
-1. Create a public GitHub repository, such as `mysthaven-v2`.
-2. Open the extracted `mysthaven-v2-prototype` folder.
-3. Upload the **contents** of the folder to the repository root.
-4. Confirm that `index.html`, `styles.css`, and `script.js` are visible at the repository root.
-5. Commit the files.
-6. Open the repository's **Settings**.
-7. Select **Pages**.
-8. Under **Build and deployment**, choose **Deploy from a branch**.
-9. Choose the `main` branch and `/ (root)` folder.
-10. Save and wait for GitHub to provide the public Pages address.
+Upload the **contents of this folder** to the root of the GitHub repository so `index.html` is at the top level.
 
-The final address will generally resemble:
+Then open:
 
-```text
-https://YOUR-USERNAME.github.io/mysthaven-v2/
-```
+**Repository Settings → Pages → Deploy from a branch → main → /(root)**
 
-## Saves
+Existing GitHub Pages projects can be updated by replacing the previous `index.html`, `styles.css`, `script.js`, documentation files and `assets/` folder.
 
-The game uses browser `localStorage` to autosave progress. Saves are specific to the browser and device being used. The **Reset** button clears the local playthrough.
+## Save compatibility
 
-## Test status
-
-- JavaScript syntax check passed.
-- Static asset references checked.
-- A complete automated browser playthrough passed from the title screen through the highest-access dream path and the **Accountable Attention** ending.
-- No JavaScript runtime errors were reported during that playthrough.
-
-## Design principle
-
-> Magic is an intensification of something people already do.
-
-Version 2 adds a companion principle:
-
-> Access is earned through attention. Ownership is not.
-
-## Version 2.1.1 patch
-
-This package includes the kitchen-table interaction fix. Object cards use persistent click delegation, older Version 2 saves are migrated automatically, and static assets are cache-busted for GitHub Pages. See `PATCH_NOTES.md`.
+This build uses a new Version 3 browser-save key. It does not import Version 2 progress because the opening progression and foundational skill state have been redesigned.

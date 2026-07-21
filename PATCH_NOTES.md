@@ -1,24 +1,39 @@
-# Mysthaven Version 2.1.1 — Kitchen Table Fix
+# Version 3 Tutorial Redesign
 
-This patch fixes an issue where the five objects on Serena's kitchen table could appear but fail to open.
+## Why this version exists
 
-## Changes
+Version 2 exposed the full object-attention system too quickly. It expected the player to understand hotspots, trace, claim, limitation, Witnessing and access gates before those ideas had been experienced.
 
-- Object-card clicks now use a persistent delegated event handler that survives scene re-rendering.
-- Existing Version 2 browser saves are normalized and repaired before use.
-- Missing object-state fields are restored automatically instead of causing a click-time JavaScript error.
-- `styles.css` and `script.js` use cache-busting version parameters so GitHub Pages browsers fetch the patch immediately.
+Version 3 replaces that opening with a teacher-led tutorial inside the story.
 
-## Updating GitHub Pages
+## Major changes
 
-Upload and overwrite these files at minimum:
+- Serena explicitly acknowledges Lyria's accidental contact and decides to teach her.
+- The wooden spoon becomes a supervised demonstration object.
+- The interface reveals one conceptual layer at a time.
+- Added foundational disciplines:
+  - Surface Reading
+  - A Narrow Question
+  - Attending
+  - Separation
+  - Witnessing
+- Added contextual teaching for incorrect choices.
+- Added a guided thimble practice with an optional **Ask Serena** hint system.
+- The full five-object table remains gated until the player repeats the process independently.
+- Tutorial progress is represented diegetically and in a compact skill strip.
+- The browser save key was changed to Version 3 to prevent incompatible Version 2 state from entering the new progression.
 
-- `index.html`
-- `script.js`
-- `styles.css`
+## Validation
 
-Uploading the complete patched folder is recommended.
+The build was automatically exercised through:
 
-After GitHub finishes deploying, refresh the game. A normal refresh should load the versioned files; a hard refresh can be used if necessary.
+- new game and prologue;
+- all five foundational lessons;
+- successful hold-to-attend interaction;
+- statement classification;
+- limit selection;
+- guided thimble inspection, trace, claim and limit;
+- independent table access;
+- reopening the wooden bird from the table.
 
-The patch attempts to preserve current Version 2 progress. If a particularly old or corrupted save still behaves strangely, select **Reset** in the game header once.
+No JavaScript runtime errors were encountered in that path.

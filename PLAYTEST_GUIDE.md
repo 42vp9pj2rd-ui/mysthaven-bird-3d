@@ -1,55 +1,83 @@
-# Mysthaven Version 2 Playtest Guide
+# Tutorial Playtest Guide
 
-## Primary questions
+## Core question
 
-1. Do locked states feel earned rather than padded?
-2. Does each lock clearly communicate what is missing?
-3. Does the player understand the difference between a claim and the trace's limitation?
-4. Does the stillness exercise feel like attention rather than reflex?
-5. Do the learned disciplines feel meaningfully different from one another?
-6. Does opening the locked room feel ethically distinct from merely gaining the technical ability to do so?
-7. Does the four-anchor dream route feel like a genuine reward for prior care?
-8. Do locked dream-composer options make earlier choices feel consequential?
+Does the player understand what the game is asking them to do because Serena has taught it through meaningful action—not because they inferred the rules from interface labels?
 
-## Approximate play time
+## Intended first-time experience
 
-A first playthrough should take approximately 25–45 minutes depending on reading speed and how many objects are fully investigated.
+### Lesson 1: Notice
 
-## High-access playtest route
+The player should understand that the marked circles identify inspectable material details. After selecting all three, they should be able to distinguish a visible mark from an interpretation.
 
-To test every major unlocked state:
+Watch for:
 
-1. Witness the wooden bird, thimble, and bone button using the first limitation option for each.
-2. Give Serena the wooden bird.
-3. Tell her the truth together with its uncertainty.
-4. In repair training, choose:
-   - **Two ideas of care**
-   - **Continuity under strain**
-5. In comparison, choose:
-   - **Brass thimble + wooden spoon** for repeated work
-   - **Wooden bird + bone button** for continuity through repair
-6. Complete three accurate Stillness marks.
-7. Order the buckle:
-   - Habit
-   - Rupture
-   - Aftermath
-8. Attend all four door channels.
-9. Ask Serena to open the door.
-10. Apply all four attention methods to the ashwood box.
-11. Carry the first box limitation.
-12. Earn all four waking anchors.
-13. In the dream:
-   - follow the thread;
-   - use any earned anchor;
-   - trace the route without entering.
-14. In the composer, the distant source and fourfold exit should both be available.
+- whether “Do not touch yet” creates useful restraint rather than frustration;
+- whether the hotspots feel like guided attention rather than a hidden-object puzzle;
+- whether Serena's correction explains the difference between observation and story.
 
-## Lower-access routes worth testing
+### Lesson 2: Ask
 
-- Give Serena the wrong object and confirm that progression returns to the table with a specific new requirement.
-- Record an invalid trace limitation and confirm that the object does not count as witnessed.
-- Miss several Stillness marks and assess whether feedback remains encouraging.
-- Enter Serena's room alone after earning the technical access.
-- Enter the dream with only three anchors and confirm the trace-without-entering route stays locked.
-- Send dream pressure without an exit.
-- Refuse to send dream pressure and use waking care instead.
+The player should understand why “What repeated use made these marks?” is safer and more useful than “Tell me the truth.”
+
+Watch for:
+
+- whether the player sees that loaded questions can manufacture apparent confirmation;
+- whether Serena sounds like a teacher rather than an instruction manual.
+
+### Lesson 3: Stay
+
+The player must hold attention long enough to receive trace. Releasing early gives gentle feedback and permits immediate retry.
+
+Watch for:
+
+- whether the hold duration feels contemplative rather than tedious;
+- whether changing text during the hold rewards continued attention;
+- whether the player understands that the trace emerges from the existing material question.
+
+### Lesson 4: Separate
+
+The player classifies three statements as material observation, received trace and personal interpretation.
+
+Watch for:
+
+- whether these categories feel meaningfully distinct;
+- whether “received trace” is comprehensible without previous worldbuilding knowledge.
+
+### Lesson 5: Limit
+
+The player identifies what the evidence cannot decide. This earns Witnessing.
+
+Watch for:
+
+- whether a limit feels like responsible knowledge rather than an arbitrary quiz answer;
+- whether “witnessed, not mastered” lands as the tutorial's emotional principle.
+
+### Guided practice
+
+The player repeats the process on the thimble. Serena no longer points at individual actions, but the side panel shows progression and an **Ask Serena for guidance** button remains available.
+
+Watch for:
+
+- when the player asks for help;
+- whether the hint answers the next conceptual need rather than solving the object;
+- whether the four-step progress display is supportive or overly explicit.
+
+### Independent test
+
+The complete table opens only after the thimble is witnessed. The player needs one additional accountable object before answering Serena's original question.
+
+Watch for:
+
+- whether the player now approaches the table with a coherent mental sequence;
+- whether the player feels newly capable rather than merely released from tutorial constraints;
+- whether the table still feels mysterious after its interface is understood.
+
+## Report these issues
+
+- Any button that does not respond.
+- Any scene where the next required action is unclear for more than thirty seconds.
+- Any term that appears before Serena has explained it through action.
+- Any wrong answer whose feedback does not explain how to improve.
+- Any gate that feels like padding rather than earned access.
+- Any moment where the tutorial's explicitness damages immersion.

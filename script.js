@@ -1,9 +1,25 @@
 'use strict';
 
-const SAVE_KEY = 'mysthaven-house-with-one-locked-door-v2';
-const TOTAL_PROGRESS_STEPS = 16;
+const SAVE_KEY = 'mysthaven-first-lesson-v3';
+const TOTAL_PROGRESS_STEPS = 22;
 
 const SKILLS = {
+  surfaceReading: {
+    name: 'Surface Reading',
+    description: 'Describe the marks an object physically carries before deciding what they mean.'
+  },
+  asking: {
+    name: 'A Narrow Question',
+    description: 'Ask for a kind of evidence the object might actually be able to supply.'
+  },
+  attending: {
+    name: 'Attending',
+    description: 'Remain with one material mark long enough for familiarity to loosen into trace.'
+  },
+  separation: {
+    name: 'Separation',
+    description: 'Distinguish material evidence, magical trace and personal interpretation.'
+  },
   witnessing: {
     name: 'Witnessing',
     description: 'Carry a trace together with a truthful account of what it cannot establish.'
@@ -188,24 +204,30 @@ const OBJECTS = {
 };
 
 const SCENE_META = {
-  title: ['Prologue', 'The House With One Locked Door', 0],
-  prologue: ['Chapter I', 'After the Rain', 1],
-  table: ['Chapter I', 'The Table', 2],
-  serena: ['Chapter I', 'Which One?', 3],
-  repair: ['Chapter II', 'Two Histories in One Break', 4],
-  comparison: ['Chapter II', 'What Repetition Keeps', 5],
-  stillness: ['Chapter II', 'The Quiet Object', 6],
-  sequence: ['Chapter II', 'Before, During, After', 7],
-  door: ['Chapter III', 'The Locked Door', 8],
-  room: ['Chapter III', 'Serena’s Room', 9],
-  box: ['Chapter III', 'Elwin’s Ashwood Box', 10],
-  night: ['Chapter IV', 'The House Asleep', 11],
-  dreamPrep: ['Chapter IV', 'Four Ways Back', 12],
-  dream: ['Chapter IV', 'The Door in Sleep', 13],
-  morning: ['Chapter V', 'What Crossed Back', 14],
-  compose: ['Chapter V', 'Pressure Without Words', 15],
-  aftermath: ['Epilogue', 'Residue', 16],
-  ending: ['Epilogue', 'The World Now Means More', 16]
+  title: ['Prologue', 'The First Lesson', 0],
+  prologue: ['Tutorial', 'A Reason to Learn', 1],
+  lessonSurface: ['Tutorial', 'A Thing Before a Story', 2],
+  lessonQuestion: ['Tutorial', 'Ask Less', 3],
+  lessonAttend: ['Tutorial', 'Stay With One Mark', 4],
+  lessonSeparate: ['Tutorial', 'Three Kinds of Knowing', 5],
+  lessonLimit: ['Tutorial', 'The Edge of the Answer', 6],
+  practice: ['Tutorial', 'Serena Steps Back', 7],
+  table: ['Chapter I', 'The Independent Test', 8],
+  serena: ['Chapter I', 'Which One?', 9],
+  repair: ['Chapter II', 'Two Histories in One Break', 10],
+  comparison: ['Chapter II', 'What Repetition Keeps', 11],
+  stillness: ['Chapter II', 'The Quiet Object', 12],
+  sequence: ['Chapter II', 'Before, During, After', 13],
+  door: ['Chapter III', 'The Locked Door', 14],
+  room: ['Chapter III', 'Serena’s Room', 15],
+  box: ['Chapter III', 'Elwin’s Ashwood Box', 16],
+  night: ['Chapter IV', 'The House Asleep', 17],
+  dreamPrep: ['Chapter IV', 'Four Ways Back', 18],
+  dream: ['Chapter IV', 'The Door in Sleep', 19],
+  morning: ['Chapter V', 'What Crossed Back', 20],
+  compose: ['Chapter V', 'Pressure Without Words', 21],
+  aftermath: ['Epilogue', 'Residue', 22],
+  ending: ['Epilogue', 'The World Now Means More', 22]
 };
 
 const GATE_REQUIREMENTS = [
@@ -229,12 +251,25 @@ function createInitialState() {
   });
 
   return {
-    version: 2,
+    version: 3,
     scene: 'title',
     objects: objectState,
     skills: [],
     returnObject: null,
     disclosure: null,
+    tutorial: {
+      surfaceFound: [],
+      surfaceChoice: null,
+      surfaceFeedback: '',
+      question: null,
+      questionFeedback: '',
+      holdComplete: false,
+      holdFeedback: '',
+      separation: { surface: null, trace: null, claim: null, feedback: '' },
+      limit: null,
+      limitFeedback: '',
+      practiceHint: ''
+    },
     training: {
       repair: { bird: null, spoon: null, feedback: '' },
       comparison: { repetition: null, repair: null, feedback: '' },
@@ -286,6 +321,8 @@ let holdValue = 0;
 let pulseTimer = null;
 let pulsePosition = 0;
 let pulseDirection = 1;
+let tutorialHoldTimer = null;
+let tutorialHoldValue = 0;
 let audio = null;
 
 const screenRoot = document.getElementById('screenRoot');
@@ -337,13 +374,18 @@ function saveState() {
 
 function normalizeState(saved) {
   const initial = createInitialState();
-  if (!saved || saved.version !== 2 || typeof saved !== 'object') return initial;
+  if (!saved || saved.version !== 3 || typeof saved !== 'object') return initial;
 
   const normalized = {
     ...initial,
     ...saved,
-    version: 2,
+    version: 3,
     objects: {},
+    tutorial: {
+      ...initial.tutorial,
+      ...(saved.tutorial || {}),
+      separation: { ...initial.tutorial.separation, ...(saved.tutorial?.separation || {}) }
+    },
     training: {
       ...initial.training,
       ...(saved.training || {}),
@@ -398,7 +440,7 @@ function loadState() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return false;
     const parsed = JSON.parse(raw);
-    if (!parsed || parsed.version !== 2) return false;
+    if (!parsed || parsed.version !== 3) return false;
     state = normalizeState(parsed);
     saveState();
     return true;
@@ -422,6 +464,7 @@ function cleanupSceneTimers() {
     pulseTimer = null;
   }
   stopHold();
+  stopTutorialHold();
 }
 
 function score(key, amount) {
@@ -464,6 +507,12 @@ function render() {
   const renderers = {
     title: renderTitle,
     prologue: renderPrologue,
+    lessonSurface: renderLessonSurface,
+    lessonQuestion: renderLessonQuestion,
+    lessonAttend: renderLessonAttend,
+    lessonSeparate: renderLessonSeparate,
+    lessonLimit: renderLessonLimit,
+    practice: renderPractice,
     table: renderTable,
     serena: renderSerena,
     repair: renderRepairTraining,
@@ -489,18 +538,18 @@ function renderTitle() {
   screenRoot.innerHTML = `
     <section class="title-screen">
       <article class="title-card parchment-frame">
-        <p class="eyebrow">A longer Mysthaven vertical slice</p>
-        <h2>The House With<br>One Locked Door</h2>
-        <p class="subtitle">Attention must be earned before access is granted.</p>
+        <p class="eyebrow">Mysthaven · guided tutorial build</p>
+        <h2>The First<br>Lesson</h2>
+        <p class="subtitle">Before Lyria can enter memory, she must learn how not to mistake attention for certainty.</p>
         <div class="title-ornament"></div>
-        <p class="lead dropcap">Rain has only just stopped. Serena has returned from Bracken Farm with a healer’s bag full of ordinary objects and one simple request: determine which object belongs to the frightened child who waited outside the birthing room.</p>
-        <p class="lead">The first door opens through curiosity. The next doors require discipline.</p>
+        <p class="lead dropcap">A child has left something behind after a difficult birth. Serena could identify it herself. Instead, she decides that Lyria’s accidental brush with object-memory has made ignorance more dangerous than instruction.</p>
+        <p class="lead">The lesson begins with a wooden spoon, a real task, and one rule: a thing must be allowed to remain a thing before it becomes a story.</p>
         <div class="version-card">
-          <strong>Version 2 adds:</strong> accountable trace limits, comparative attention, a stillness test, sequence reconstruction, a five-part access gate, a locked-room investigation, four waking anchors, and dream options that remain unavailable unless their disciplines have been earned.
+          <strong>Tutorial design:</strong> every mechanic is introduced by Serena, demonstrated on one familiar object, practised with feedback, and only then opened for independent use. Interface states remain locked until their underlying discipline has been earned.
         </div>
         <div class="button-row">
-          <button id="newGameBtn" class="action-btn primary" type="button">Begin a new game</button>
-          ${hasSave ? '<button id="continueBtn" class="action-btn secondary" type="button">Continue saved game</button>' : ''}
+          <button id="newGameBtn" class="action-btn primary" type="button">Begin the lesson</button>
+          ${hasSave ? '<button id="continueBtn" class="action-btn secondary" type="button">Continue saved lesson</button>' : ''}
         </div>
         <p class="save-note">Progress is stored locally in this browser.</p>
       </article>
@@ -527,18 +576,385 @@ function renderPrologue() {
     <section class="story-screen">
       <article class="story-card parchment-frame">
         <p class="eyebrow">After the birth</p>
-        <h2>After the Rain</h2>
+        <h2>A Reason to Learn</h2>
         <div class="story-copy">
           <p class="dropcap">The rain has exhausted itself against the shutters. Water still ticks from the eaves, one drop at a time, as though the house is counting something it does not trust itself to remember.</p>
           <p>Serena empties her healer’s bag onto the kitchen table: a child’s toy, an old thimble, a bent buckle, a bone button, and the spoon Lyria carried home among the instruments. She has washed her hands three times. A crescent of red remains beneath one thumbnail.</p>
-          <p class="dialogue">“The younger child left something at Bracken Farm,” Serena says. “One of these. See whether you can work out which.”</p>
-          <p>It sounds like trust. It also sounds like a test Serena has not admitted is a test.</p>
+          <p class="dialogue">“The younger child left something at Bracken Farm,” Serena says. “One of these. I could tell you which. But you touched the spoon on the road and heard something it never said aloud.”</p>
+          <p>Lyria waits for denial. Serena gives her none.</p>
+          <p class="dialogue">“That means we begin properly. Not with the strange part. With the part any careful person can learn.”</p>
         </div>
-        <div class="button-row"><button id="toTableBtn" class="action-btn primary" type="button">Go to the table</button></div>
+        <div class="button-row"><button id="beginLessonBtn" class="action-btn primary" type="button">Sit beside Serena</button></div>
       </article>
     </section>
   `;
-  document.getElementById('toTableBtn').addEventListener('click', () => setScene('table'));
+  document.getElementById('beginLessonBtn').addEventListener('click', () => setScene('lessonSurface'));
+}
+
+function teacherPanel(step, title, body, gateText) {
+  return `
+    <aside class="teacher-card parchment-frame">
+      <p class="eyebrow">Serena teaches</p>
+      <span class="lesson-count">Lesson ${step} of 6</span>
+      <h3>${title}</h3>
+      <div class="teacher-line">${body}</div>
+      ${gateText ? `<div class="gate-note"><strong>Why the next state is locked</strong><span>${gateText}</span></div>` : ''}
+    </aside>
+  `;
+}
+
+function tutorialSkillStrip(active) {
+  const sequence = [
+    ['surfaceReading','Notice'],
+    ['asking','Ask'],
+    ['attending','Stay'],
+    ['separation','Separate'],
+    ['witnessing','Limit']
+  ];
+  return `<div class="tutorial-skill-strip">${sequence.map(([id,label]) => `
+    <div class="tutorial-skill ${hasSkill(id) ? 'earned' : ''} ${active === id ? 'active' : ''}">
+      <span>${hasSkill(id) ? '✓' : '○'}</span><strong>${label}</strong>
+    </div>`).join('')}</div>`;
+}
+
+function renderLessonSurface() {
+  const t = state.tutorial;
+  const found = new Set(t.surfaceFound);
+  const allFound = found.size === 3;
+  const details = OBJECTS.spoon.observations;
+  screenRoot.innerHTML = `
+    ${tutorialSkillStrip('surfaceReading')}
+    <section class="tutorial-shell">
+      <article class="tutorial-work parchment-frame">
+        <p class="eyebrow">A thing before a story</p>
+        <h2>Do Not Touch Yet</h2>
+        <p class="narrative">Serena puts the spoon between you and turns its handle toward the window. She does not ask what happened to it. She asks what is there.</p>
+        <div class="lesson-image-wrap">
+          <img src="${OBJECTS.spoon.image}" alt="Serena’s wooden spoon">
+          ${details.map((d,i) => `<button class="lesson-hotspot ${found.has(i) ? 'found' : ''}" data-surface-detail="${i}" style="left:${d.x}%;top:${d.y}%" aria-label="Inspect a material mark"></button>`).join('')}
+        </div>
+        <div class="observation-list tutorial-observations">
+          ${found.size ? [...found].sort().map(i => `<div class="observation"><strong>Observed:</strong> ${details[i].text}</div>`).join('') : '<div class="empty-state">Find a place where repeated use, heat or grip has changed the wood.</div>'}
+        </div>
+        ${allFound ? `
+          <section class="lesson-check">
+            <h3>Which sentence is still only an observation?</h3>
+            <div class="choice-stack">
+              ${choiceRadio('surfaceChoice','wear','The handle is polished in two separate places.','This names a visible feature without deciding who caused it.',t.surfaceChoice)}
+              ${choiceRadio('surfaceChoice','trust','Serena trusted a child with important work.','This may be true, but it is already a story about intention.',t.surfaceChoice)}
+              ${choiceRadio('surfaceChoice','fear','The spoon remembers fear.','This describes a possible trace before any trace has been reached.',t.surfaceChoice)}
+            </div>
+            ${t.surfaceFeedback ? `<div class="feedback-box ${hasSkill('surfaceReading') ? 'success' : 'warning'}">${t.surfaceFeedback}</div>` : ''}
+            <div class="button-row">
+              ${hasSkill('surfaceReading') ? '<button id="surfaceNextBtn" class="action-btn primary" type="button">Ask a useful question</button>' : '<button id="surfaceCheckBtn" class="action-btn primary" type="button" '+(t.surfaceChoice ? '' : 'disabled')+'>Answer Serena</button>'}
+            </div>
+          </section>` : ''}
+      </article>
+      ${teacherPanel(1,'Notice before meaning','“Tell me what the wood shows. Not what I felt. Not what you hope it means. Start with the mark that would still be there if neither of us could remember.”','Trace access remains locked until you can distinguish a physical mark from a story about it.')}
+    </section>
+  `;
+
+  document.querySelectorAll('[data-surface-detail]').forEach(btn => btn.addEventListener('click', () => {
+    const index = Number(btn.dataset.surfaceDetail);
+    if (!t.surfaceFound.includes(index)) t.surfaceFound.push(index);
+    saveState();
+    renderLessonSurface();
+  }));
+  bindRadioState('surfaceChoice', value => { t.surfaceChoice = value; t.surfaceFeedback = ''; saveState(); renderLessonSurface(); });
+  const check = document.getElementById('surfaceCheckBtn');
+  if (check) check.addEventListener('click', () => {
+    if (t.surfaceChoice === 'wear') {
+      unlockSkill('surfaceReading');
+      t.surfaceFeedback = 'Serena nods. “Good. You have not made the spoon smaller by refusing to explain it too soon.”';
+      score('craft',1);
+    } else {
+      t.surfaceFeedback = '“You crossed the distance between mark and meaning without noticing,” Serena says. “Come back to what another pair of eyes could verify.”';
+    }
+    saveState(); renderLessonSurface();
+  });
+  const next = document.getElementById('surfaceNextBtn');
+  if (next) next.addEventListener('click', () => setScene('lessonQuestion'));
+}
+
+function renderLessonQuestion() {
+  const t = state.tutorial;
+  screenRoot.innerHTML = `
+    ${tutorialSkillStrip('asking')}
+    <section class="tutorial-shell">
+      <article class="tutorial-work parchment-frame">
+        <p class="eyebrow">Attention needs a shape</p>
+        <h2>Ask Less</h2>
+        <p class="narrative">The spoon has many years in it. Serena says that a broad question does not open more history. It gives expectation more room to choose the answer.</p>
+        <div class="question-object-row">
+          <img src="${OBJECTS.spoon.image}" alt="Serena’s wooden spoon">
+          <div>
+            <p class="dialogue">“Do not ask an object to tell you the truth. Ask for one kind of pressure it might have learned.”</p>
+            <h3>Which question fits the evidence you found?</h3>
+          </div>
+        </div>
+        <div class="choice-stack">
+          ${choiceRadio('tutorialQuestion','everything','What happened to this spoon?','A question so broad that almost any impression can feel like an answer.',t.question)}
+          ${choiceRadio('tutorialQuestion','secret','What is Serena hiding from me?','The desired conclusion is already hidden inside the question.',t.question)}
+          ${choiceRadio('tutorialQuestion','repetition','What repeated use made these two polished places?','A narrow question tied to marks already present.',t.question)}
+          ${choiceRadio('tutorialQuestion','truth','Show me the truth.','A command without a scale, subject or limit.',t.question)}
+        </div>
+        ${t.questionFeedback ? `<div class="feedback-box ${hasSkill('asking') ? 'success' : 'warning'}">${t.questionFeedback}</div>` : ''}
+        <div class="button-row">
+          ${hasSkill('asking') ? '<button id="questionNextBtn" class="action-btn primary" type="button">Stay with the mark</button>' : '<button id="questionCheckBtn" class="action-btn primary" type="button" '+(t.question ? '' : 'disabled')+'>Ask the spoon</button>'}
+        </div>
+      </article>
+      ${teacherPanel(2,'Ask what can be answered','“A bad question is not a moral failure. But if you hide your answer inside the question, the magic will make your certainty feel discovered.”','Attending remains locked until the player forms a question grounded in observable evidence.')}
+    </section>
+  `;
+  bindRadioState('tutorialQuestion', value => { t.question = value; t.questionFeedback = ''; saveState(); renderLessonQuestion(); });
+  const check = document.getElementById('questionCheckBtn');
+  if (check) check.addEventListener('click', () => {
+    if (t.question === 'repetition') {
+      unlockSkill('asking');
+      t.questionFeedback = '“That question has edges,” Serena says. “Now the spoon has somewhere honest to answer.”';
+      score('craft',1);
+    } else {
+      t.questionFeedback = t.question === 'secret'
+        ? 'Serena’s expression does not harden. “You asked the spoon to accuse me. Try again without putting a person on trial.”'
+        : '“Smaller,” Serena says. “Name the mark. Name the kind of pressure. Leave room for no answer at all.”';
+    }
+    saveState(); renderLessonQuestion();
+  });
+  const next = document.getElementById('questionNextBtn');
+  if (next) next.addEventListener('click', () => setScene('lessonAttend'));
+}
+
+function renderLessonAttend() {
+  const t = state.tutorial;
+  screenRoot.innerHTML = `
+    ${tutorialSkillStrip('attending')}
+    <section class="tutorial-shell">
+      <article class="tutorial-work parchment-frame">
+        <p class="eyebrow">The threshold</p>
+        <h2>Stay With One Mark</h2>
+        <p class="narrative">Serena places your thumb where the smaller patch of polish begins. “Do not chase an image,” she says. “Keep the question. Keep the wood. Let anything else come to you.”</p>
+        <div class="attend-stage ${t.holdComplete ? 'complete' : ''}">
+          <img src="${OBJECTS.spoon.image}" alt="Serena’s wooden spoon">
+          <div class="attend-copy">
+            <p id="attendPrompt">${t.holdComplete ? 'Steam. The click of wood against a pot. A second, smaller hand learning the same circle.' : 'Hold without moving away when nothing happens immediately.'}</p>
+            <button id="tutorialHoldBtn" class="action-btn secondary" type="button" ${t.holdComplete ? 'disabled' : ''}>${t.holdComplete ? 'Trace reached' : 'Hold to attend'}</button>
+            <div class="hold-track"><div id="tutorialHoldFill" class="hold-fill" style="width:${t.holdComplete ? 100 : 0}%"></div></div>
+          </div>
+        </div>
+        ${t.holdFeedback ? `<div class="feedback-box ${t.holdComplete ? 'success' : 'muted'}">${t.holdFeedback}</div>` : ''}
+        ${t.holdComplete ? '<div class="button-row"><button id="attendNextBtn" class="action-btn primary" type="button">Sort what you know</button></div>' : ''}
+      </article>
+      ${teacherPanel(3,'Stay without forcing','“Most people stop attending when the object fails to perform. That teaches the hand to reward spectacle. Stay with the mark, not with your hunger for an answer.”','Trace remains inaccessible until observation and a narrow question have both been earned.')}
+    </section>
+  `;
+  const holdBtn = document.getElementById('tutorialHoldBtn');
+  if (holdBtn && !t.holdComplete) {
+    const start = event => { if (event) event.preventDefault(); startTutorialHold(); };
+    const stop = () => stopTutorialHold(false);
+    holdBtn.addEventListener('mousedown', start);
+    holdBtn.addEventListener('mouseup', stop);
+    holdBtn.addEventListener('mouseleave', stop);
+    holdBtn.addEventListener('touchstart', start, {passive:false});
+    holdBtn.addEventListener('touchend', stop);
+  }
+  const next = document.getElementById('attendNextBtn');
+  if (next) next.addEventListener('click', () => setScene('lessonSeparate'));
+}
+
+function startTutorialHold() {
+  if (state.tutorial.holdComplete || tutorialHoldTimer) return;
+  tutorialHoldValue = 0;
+  const fill = document.getElementById('tutorialHoldFill');
+  const prompt = document.getElementById('attendPrompt');
+  state.tutorial.holdFeedback = '';
+  tutorialHoldTimer = setInterval(() => {
+    tutorialHoldValue += 2;
+    if (fill) fill.style.width = `${Math.min(100,tutorialHoldValue)}%`;
+    if (prompt) {
+      if (tutorialHoldValue > 25) prompt.textContent = 'The polished place warms beneath your thumb.';
+      if (tutorialHoldValue > 55) prompt.textContent = 'Do not follow the steam. Keep the wood beneath it.';
+      if (tutorialHoldValue > 80) prompt.textContent = 'A second rhythm begins inside the first.';
+    }
+    if (tutorialHoldValue >= 100) {
+      stopTutorialHold(true);
+      state.tutorial.holdComplete = true;
+      state.tutorial.holdFeedback = 'Serena lets go of your wrist. “You did not seize it. You gave it time enough to answer.”';
+      unlockSkill('attending');
+      score('craft',1);
+      saveState();
+      renderLessonAttend();
+    }
+  }, 70);
+}
+
+function stopTutorialHold(completed = false) {
+  if (tutorialHoldTimer) {
+    clearInterval(tutorialHoldTimer);
+    tutorialHoldTimer = null;
+  }
+  if (!completed && tutorialHoldValue > 0 && !state.tutorial.holdComplete) {
+    state.tutorial.holdFeedback = '“You left when waiting became uncomfortable,” Serena says. “Nothing is wrong. Begin again, and notice the urge to make the object hurry.”';
+    tutorialHoldValue = 0;
+    saveState();
+    renderLessonAttend();
+  }
+}
+
+function classificationRow(key, statement, value) {
+  return `
+    <div class="classification-row">
+      <p>${statement}</p>
+      <select data-classification="${key}" aria-label="Classify this statement">
+        <option value="" ${!value ? 'selected' : ''}>Choose a kind of knowing</option>
+        <option value="surface" ${value === 'surface' ? 'selected' : ''}>Material observation</option>
+        <option value="trace" ${value === 'trace' ? 'selected' : ''}>Received trace</option>
+        <option value="claim" ${value === 'claim' ? 'selected' : ''}>Lyria’s interpretation</option>
+      </select>
+    </div>`;
+}
+
+function renderLessonSeparate() {
+  const t = state.tutorial.separation;
+  const complete = hasSkill('separation');
+  screenRoot.innerHTML = `
+    ${tutorialSkillStrip('separation')}
+    <section class="tutorial-shell">
+      <article class="tutorial-work parchment-frame">
+        <p class="eyebrow">Do not let the layers collapse</p>
+        <h2>Three Kinds of Knowing</h2>
+        <p class="narrative">The experience arrived as one thing. Serena makes you take it apart. “Not to weaken it,” she says. “To keep you from lending the object your own voice and then obeying it.”</p>
+        <div class="classification-grid">
+          ${classificationRow('surface','The handle is polished in two separate places.',t.surface)}
+          ${classificationRow('trace','A smaller hand repeats the stirring circle inside Serena’s rhythm.',t.trace)}
+          ${classificationRow('claim','Trust and exclusion can live inside the same shared task.',t.claim)}
+        </div>
+        ${t.feedback ? `<div class="feedback-box ${complete ? 'success' : 'warning'}">${t.feedback}</div>` : ''}
+        <div class="button-row">
+          ${complete ? '<button id="separateNextBtn" class="action-btn primary" type="button">Find the edge of the answer</button>' : '<button id="separateCheckBtn" class="action-btn primary" type="button" '+(t.surface && t.trace && t.claim ? '' : 'disabled')+'>Let Serena check</button>'}
+        </div>
+      </article>
+      ${teacherPanel(4,'Separate evidence from meaning','“The surface can be checked by another eye. The trace is what crossed into you. The claim is the meaning you choose to carry out. Confuse them, and your conclusion will feel older than you are.”','Interpretation remains locked until the player can name which parts came from matter, magic and self.')}
+    </section>
+  `;
+  document.querySelectorAll('[data-classification]').forEach(select => select.addEventListener('change', () => {
+    t[select.dataset.classification] = select.value || null;
+    t.feedback = '';
+    saveState(); renderLessonSeparate();
+  }));
+  const check = document.getElementById('separateCheckBtn');
+  if (check) check.addEventListener('click', () => {
+    if (t.surface === 'surface' && t.trace === 'trace' && t.claim === 'claim') {
+      unlockSkill('separation');
+      t.feedback = 'Serena repeats the three sentences in reverse order. None has changed, but they no longer pretend to be the same kind of truth.';
+      score('craft',1);
+    } else {
+      t.feedback = '“Ask who could verify each sentence,” Serena says. “Another eye? Only the person who received it? Or only the person deciding what it means?”';
+    }
+    saveState(); renderLessonSeparate();
+  });
+  const next = document.getElementById('separateNextBtn');
+  if (next) next.addEventListener('click', () => setScene('lessonLimit'));
+}
+
+function renderLessonLimit() {
+  const t = state.tutorial;
+  const complete = hasSkill('witnessing');
+  screenRoot.innerHTML = `
+    ${tutorialSkillStrip('witnessing')}
+    <section class="tutorial-shell">
+      <article class="tutorial-work parchment-frame">
+        <p class="eyebrow">An answer with an edge</p>
+        <h2>What Can This Not Tell You?</h2>
+        <div class="evidence-stack">
+          <div><strong>Material:</strong> Two places on the spoon are polished by repeated grip.</div>
+          <div><strong>Trace:</strong> A smaller hand repeats Serena’s stirring rhythm while a closed door remains nearby.</div>
+          <div><strong>Possible claim:</strong> Trust and exclusion lived inside the same shared work.</div>
+        </div>
+        <p class="dialogue">“Now protect the answer from becoming larger than its evidence,” Serena says.</p>
+        <div class="choice-stack">
+          ${choiceRadio('tutorialLimit','motive','It cannot decide whether Serena’s exclusion was necessary protection or controlling secrecy.','The trace supplies relationship and pressure, but not a final judgment of motive.',t.limit)}
+          ${choiceRadio('tutorialLimit','twoHands','It cannot establish that two people used the spoon.','The surface and trace both directly support two patterns of use.',t.limit)}
+          ${choiceRadio('tutorialLimit','routine','It cannot reveal repetition.','Repetition is present in both wear and rhythm.',t.limit)}
+          ${choiceRadio('tutorialLimit','serena','It cannot establish that the spoon belonged to Serena.','The tutorial context and repeated grip make this the weakest uncertainty.',t.limit)}
+        </div>
+        ${t.limitFeedback ? `<div class="feedback-box ${complete ? 'success' : 'warning'}">${t.limitFeedback}</div>` : ''}
+        <div class="button-row">
+          ${complete ? '<button id="limitNextBtn" class="action-btn primary" type="button">Try without Serena’s hand over yours</button>' : '<button id="limitCheckBtn" class="action-btn primary" type="button" '+(t.limit ? '' : 'disabled')+'>Name the limit</button>'}
+        </div>
+      </article>
+      ${teacherPanel(5,'Keep uncertainty attached','“A limit is not a confession that you learned nothing. It is the shape that keeps what you learned from becoming permission.”','Independent object access remains locked until Lyria can carry both a claim and the honest boundary of that claim.')}
+    </section>
+  `;
+  bindRadioState('tutorialLimit', value => { t.limit = value; t.limitFeedback = ''; saveState(); renderLessonLimit(); });
+  const check = document.getElementById('limitCheckBtn');
+  if (check) check.addEventListener('click', () => {
+    if (t.limit === 'motive') {
+      unlockSkill('witnessing');
+      const spoon = state.objects.spoon;
+      spoon.observed = [0,1,2];
+      spoon.traceSeen = true;
+      spoon.claim = 3;
+      spoon.limit = 0;
+      spoon.accountable = true;
+      t.limitFeedback = 'Serena closes your journal over the claim and its limit together. “Now you have witnessed the spoon. Not mastered it. Witnessed it.”';
+      score('care',1); score('craft',1);
+    } else {
+      t.limitFeedback = '“That answer denies something the spoon actually gave us,” Serena says. “A limit protects uncertainty. It does not erase evidence.”';
+    }
+    saveState(); renderLessonLimit();
+  });
+  const next = document.getElementById('limitNextBtn');
+  if (next) next.addEventListener('click', () => setScene('practice'));
+}
+
+function practiceHintText() {
+  const item = state.objects.thimble;
+  if (item.observed.length === 0) return '“Begin where use has changed the material,” Serena says. “The crown, the band, the rim. Do not begin with a story about the owner.”';
+  if (item.observed.length < 3) return '“Do not collect details at random. Compare where pressure is uneven and where time has made edges soft.”';
+  if (!item.traceSeen) return '“You have enough surface. Choose the question repetition might answer, then stay.”';
+  if (item.claim === null) return '“The trace gave you repetition, inheritance and correction. Decide what meaning you can responsibly carry from that.”';
+  if (item.limit !== 0) return '“Your limit should preserve what remains uncertain without denying sewing, repetition or more than one hand.”';
+  return 'Serena says nothing. The silence is no longer abandonment; it is room for you to finish.';
+}
+
+function renderPractice() {
+  const item = state.objects.thimble;
+  screenRoot.innerHTML = `
+    ${tutorialSkillStrip('witnessing')}
+    <section class="tutorial-shell">
+      <article class="tutorial-work parchment-frame">
+        <p class="eyebrow">Guided practice</p>
+        <h2>Serena Steps Back</h2>
+        <p class="narrative">Serena replaces the spoon with the brass thimble. “I will not point to the marks,” she says. “But I am still here. Ask when you need the lesson, not when you need me to choose for you.”</p>
+        <div class="task-box"><strong>Your task:</strong> witness the thimble by completing the same sequence—surface, question, attention, claim and limit.</div>
+        ${objectCardMarkup(OBJECTS.thimble)}
+        ${state.tutorial.practiceHint ? `<div class="teacher-line practice-hint">${state.tutorial.practiceHint}</div>` : ''}
+        <div class="button-row">
+          <button id="askSerenaBtn" class="action-btn ghost" type="button">Ask Serena for guidance</button>
+          <button id="practiceNextBtn" class="action-btn primary" type="button" ${item.accountable ? '' : 'disabled'}>Return to the full table</button>
+        </div>
+      </article>
+      <aside class="teacher-card parchment-frame">
+        <p class="eyebrow">Practice without guessing</p>
+        <h3>The sequence you have earned</h3>
+        <ol class="lesson-sequence">
+          <li class="${item.observed.length === 3 ? 'complete' : ''}">Notice material marks <span>${item.observed.length} / 3</span></li>
+          <li class="${item.traceSeen ? 'complete' : ''}">Stay until trace answers <span>${item.traceSeen ? 'complete' : 'locked by surface'}</span></li>
+          <li class="${item.claim !== null ? 'complete' : ''}">Choose a claim <span>${item.claim !== null ? 'chosen' : 'locked by trace'}</span></li>
+          <li class="${item.accountable ? 'complete' : ''}">Name the limit <span>${item.accountable ? 'witnessed' : 'not yet accountable'}</span></li>
+        </ol>
+        <div class="gate-note"><strong>Why the full table is locked</strong><span>Serena opens independent access only after you repeat the process once without step-by-step prompting.</span></div>
+      </aside>
+    </section>
+  `;
+  document.getElementById('askSerenaBtn').addEventListener('click', () => {
+    state.tutorial.practiceHint = practiceHintText();
+    saveState(); renderPractice();
+  });
+  document.getElementById('practiceNextBtn').addEventListener('click', () => {
+    state.tutorial.practiceHint = '';
+    setScene('table');
+  });
 }
 
 function objectCardMarkup(obj) {
@@ -570,14 +986,14 @@ function renderTable() {
   screenRoot.innerHTML = `
     <section class="scene-shell">
       <article class="scene-card parchment-frame">
-        <p class="eyebrow">Ordinary observation</p>
+        <p class="eyebrow">Independent test</p>
         <h2>Serena’s Kitchen Table</h2>
         <div class="narrative">
-          <p>The room contains no glowing relics. Nothing calls to you. A table is only a table until you decide to ask more of it.</p>
-          <p>For an object to count as <strong>witnessed</strong>, you must find its material marks, remain with its trace, form a claim, and identify what the trace cannot establish.</p>
+          <p>Serena moves her chair away from yours. The table is no longer an unexplained interface full of demands. It is five ordinary objects and a sequence you have practised twice.</p>
+          <p class="dialogue">“You have witnessed the spoon with me and the thimble beside me,” Serena says. “Now choose what deserves your attention. Bring me one more witnessed object, then answer the reason we began.”</p>
         </div>
         ${state.flags.serenaFeedback ? `<div class="feedback-box warning">${state.flags.serenaFeedback}</div>` : ''}
-        <div class="task-box"><strong>Access gate:</strong> Witness three objects accountably. ${count} / 3. ${state.flags.mustStudyBird && !birdReady ? 'Serena has also required you to study the wooden bird.' : ''}</div>
+        <div class="task-box"><strong>Independent gate:</strong> Witness one additional object. Total witnessed: ${count} / 3. ${state.flags.mustStudyBird && !birdReady ? 'Serena has also required you to study the wooden bird.' : ''}</div>
         <div class="object-grid">${Object.values(OBJECTS).map(objectCardMarkup).join('')}</div>
         <div class="button-row">
           <button id="callSerenaBtn" class="action-btn primary" type="button" ${canContinue ? '' : 'disabled'}>Call Serena back</button>
@@ -585,8 +1001,8 @@ function renderTable() {
       </article>
       <aside class="side-card parchment-frame">
         <p class="eyebrow">Earned access</p>
-        <h3>Witnessing</h3>
-        <p class="muted">A vivid trace is not enough. Access to later states requires a claim carried together with its limit.</p>
+        <h3>What you now know how to do</h3>
+        <p class="muted">Notice → ask → stay → separate → limit. The words are available because the actions have been practised.</p>
         ${gateMarkup('Three accountable objects', count >= 3, `${count} / 3 witnessed`)}
         ${state.flags.mustStudyBird ? gateMarkup('Wooden bird witnessed', birdReady, birdReady ? 'Ready' : 'Still locked') : ''}
       </aside>
@@ -1822,6 +2238,10 @@ function renderJournal() {
   }).join('');
 
   journalGates.innerHTML = `
+    ${gateJournal('Surface Reading', hasSkill('surfaceReading'), hasSkill('surfaceReading') ? 'Earned with Serena' : 'Locked')}
+    ${gateJournal('A Narrow Question', hasSkill('asking'), hasSkill('asking') ? 'Earned with Serena' : 'Locked')}
+    ${gateJournal('Attending', hasSkill('attending'), hasSkill('attending') ? 'Earned with Serena' : 'Locked')}
+    ${gateJournal('Separation', hasSkill('separation'), hasSkill('separation') ? 'Earned with Serena' : 'Locked')}
     ${gateJournal('Three accountable objects', accountableCount() >= 3, `${accountableCount()} / 3`)}
     ${gateJournal('Locked door channels', state.door.channels.length === 4, `${state.door.channels.length} / 4`)}
     ${gateJournal('Ashwood box methods', state.box.methods.length === 4, `${state.box.methods.length} / 4`)}
