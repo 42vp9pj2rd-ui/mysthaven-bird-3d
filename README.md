@@ -126,3 +126,7 @@ The game uses browser `localStorage` to autosave progress. Saves are specific to
 Version 2 adds a companion principle:
 
 > Access is earned through attention. Ownership is not.
+
+## Version 2.1.1 patch
+
+This package includes the kitchen-table interaction fix. Object cards use persistent click delegation, older Version 2 saves are migrated automatically, and static assets are cache-busted for GitHub Pages. See `PATCH_NOTES.md`.

@@ -335,13 +335,72 @@ function saveState() {
   localStorage.setItem(SAVE_KEY, JSON.stringify(state));
 }
 
+function normalizeState(saved) {
+  const initial = createInitialState();
+  if (!saved || saved.version !== 2 || typeof saved !== 'object') return initial;
+
+  const normalized = {
+    ...initial,
+    ...saved,
+    version: 2,
+    objects: {},
+    training: {
+      ...initial.training,
+      ...(saved.training || {}),
+      repair: { ...initial.training.repair, ...(saved.training?.repair || {}) },
+      comparison: { ...initial.training.comparison, ...(saved.training?.comparison || {}) },
+      stillness: { ...initial.training.stillness, ...(saved.training?.stillness || {}) },
+      sequence: { ...initial.training.sequence, ...(saved.training?.sequence || {}) }
+    },
+    door: { ...initial.door, ...(saved.door || {}) },
+    box: { ...initial.box, ...(saved.box || {}) },
+    anchors: { ...initial.anchors, ...(saved.anchors || {}) },
+    anchorAttempts: { ...initial.anchorAttempts, ...(saved.anchorAttempts || {}) },
+    dream: {
+      ...initial.dream,
+      ...(saved.dream || {}),
+      compose: { ...initial.dream.compose, ...(saved.dream?.compose || {}) }
+    },
+    scores: { ...initial.scores, ...(saved.scores || {}) },
+    flags: { ...initial.flags, ...(saved.flags || {}) }
+  };
+
+  Object.keys(OBJECTS).forEach(id => {
+    const previous = saved.objects?.[id] || {};
+    const observed = Array.isArray(previous.observed)
+      ? [...new Set(previous.observed.filter(index => Number.isInteger(index) && index >= 0 && index < OBJECTS[id].observations.length))]
+      : [];
+    normalized.objects[id] = {
+      ...initial.objects[id],
+      ...previous,
+      observed
+    };
+  });
+
+  normalized.skills = Array.isArray(saved.skills)
+    ? [...new Set(saved.skills.filter(id => Object.prototype.hasOwnProperty.call(SKILLS, id)))]
+    : [];
+  normalized.door.channels = Array.isArray(normalized.door.channels) ? normalized.door.channels : [];
+  normalized.box.methods = Array.isArray(normalized.box.methods) ? normalized.box.methods : [];
+  normalized.dream.residue = Array.isArray(normalized.dream.residue) ? normalized.dream.residue : [];
+  normalized.training.sequence.order = Array.isArray(normalized.training.sequence.order)
+    ? normalized.training.sequence.order
+    : [...initial.training.sequence.order];
+  normalized.scene = Object.prototype.hasOwnProperty.call(SCENE_META, normalized.scene)
+    ? normalized.scene
+    : 'title';
+
+  return normalized;
+}
+
 function loadState() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return false;
     const parsed = JSON.parse(raw);
     if (!parsed || parsed.version !== 2) return false;
-    state = parsed;
+    state = normalizeState(parsed);
+    saveState();
     return true;
   } catch (error) {
     console.warn('Could not load Mysthaven save:', error);
@@ -542,9 +601,8 @@ function renderTable() {
 }
 
 function bindObjectCards() {
-  document.querySelectorAll('[data-object]').forEach(button => {
-    button.addEventListener('click', () => openObject(button.dataset.object));
-  });
+  // Object cards are handled by delegated click binding on screenRoot.
+  // Delegation survives scene re-renders and prevents stale card listeners.
 }
 
 function renderSerena() {
@@ -1621,10 +1679,15 @@ function scoreCard(value,label) {
 }
 
 function openObject(id) {
+  if (!Object.prototype.hasOwnProperty.call(OBJECTS, id)) return;
+  if (!state.objects || !state.objects[id]) {
+    state = normalizeState(state);
+    saveState();
+  }
   currentObjectId = id;
-  renderObjectModal();
   objectModal.classList.remove('hidden');
   objectModal.setAttribute('aria-hidden','false');
+  renderObjectModal();
 }
 
 function closeObject() {
@@ -1842,6 +1905,13 @@ function stopAmbient() {
   try { audio.source.stop(); audio.ctx.close(); } catch (_) {}
   audio = null;
 }
+
+screenRoot.addEventListener('click', event => {
+  const card = event.target.closest('[data-object]');
+  if (!card || !screenRoot.contains(card)) return;
+  event.preventDefault();
+  openObject(card.dataset.object);
+});
 
 objectCloseBtn.addEventListener('click', closeObject);
 objectBackdrop.addEventListener('click', closeObject);
